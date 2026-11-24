@@ -1,0 +1,735 @@
+================================================================================
+                        SOFTWARE REQUIREMENTS SPECIFICATION
+                                    FOR
+                                  SKILLORA
+                 Your skills. Your opportunities. Your marketplace.
+================================================================================
+
+Course Code: [INT 252 ]
+Course Name: [Web Development with reactJS]
+Student Names: [Bollimuntha Naga Sai Teja, Yogesh Kumar, Sanjana Kumari, Pasupula Hemanjali]
+Student Registration Numbers: [Student Registration Numbers]
+Prepared for: Continuous Assessment 3
+Term: Autumn 2026
+
+================================================================================
+                               TABLE OF CONTENTS
+================================================================================
+Revision History ........................................................... ii
+1. Introduction ............................................................ 1
+   1.1 Purpose ............................................................. 1
+   1.2 Scope ............................................................... 1
+   1.3 Definitions, Acronyms, and Abbreviations ............................ 2
+   1.4 References .......................................................... 2
+   1.5 Overview ............................................................ 2
+2. General Description ..................................................... 3
+   2.1 Product Perspective ................................................. 3
+   2.2 Product Functions ................................................... 3
+   2.3 User Characteristics ................................................ 4
+   2.4 General Constraints ................................................. 4
+   2.5 Assumptions and Dependencies ........................................ 5
+3. Specific Requirements ................................................... 6
+   3.1 External Interface Requirements ..................................... 6
+       3.1.1 User Interfaces ............................................... 6
+       3.1.2 Hardware Interfaces ........................................... 7
+       3.1.3 Software Interfaces ........................................... 7
+       3.1.4 Communications Interfaces ..................................... 7
+   3.2 Functional Requirements ............................................. 8
+       3.2.1 User Authentication & Dual-Mode Switching ..................... 8
+       3.2.2 Student Profile & Campus Verification ......................... 9
+       3.2.3 Service Catalog & Gig Management ............................. 10
+       3.2.4 Service Discovery, Search, and Filtering ..................... 11
+       3.2.5 End-to-End Order Lifecycle Management ........................ 12
+       3.2.6 Reviews and Reputation Engine ................................ 14
+       3.2.7 In-App Event Notifications ................................... 15
+       3.2.8 Administrative Oversight & Moderation ........................ 16
+   3.5 Non-Functional Requirements ........................................ 17
+       3.5.1 Performance .................................................. 17
+       3.5.2 Reliability .................................................. 17
+       3.5.3 Availability ................................................. 18
+       3.5.4 Security ..................................................... 18
+       3.5.5 Maintainability .............................................. 19
+       3.5.6 Portability .................................................. 19
+   3.7 Design Constraints ................................................. 19
+   3.9 Other Requirements ................................................. 20
+4. Analysis Models ........................................................ 21
+   4.1 Data Flow Diagrams (DFD) ........................................... 21
+       4.1.1 Level 0 DFD (Context Diagram) ................................ 21
+       4.1.2 Level 1 DFD (Decomposed System Architecture) ................. 22
+       4.1.3 State Transition Model (Order Lifecycle) ..................... 23
+5. GitHub Link ............................................................ 24
+6. Deployed Link .......................................................... 24
+
+================================================================================
+                               REVISION HISTORY
+================================================================================
+Version | Date         | Description of Changes                   | Author
+--------|--------------|------------------------------------------|-------------
+1.0.0   | 15-Nov-2026  | Initial Draft of System Architecture     | Development Team
+1.1.0   | 18-Nov-2026  | Database Schema & Auth Specification     | Development Team
+1.2.0   | 24-Nov-2026  | Complete Functional & Non-Functional SRS | Development Team
+
+================================================================================
+1. INTRODUCTION
+================================================================================
+
+1.1 PURPOSE
+The purpose of this Software Requirements Specification (SRS) is to establish a 
+rigorous, complete, and verifiable description of the "Skillora" web platform. 
+This specification outlines the functional features, interface behaviors, 
+database architecture, operational constraints, and non-functional guarantees 
+expected of the platform.
+
+The intended audience includes:
+- Academic Evaluators and Instructors reviewing Continuous Assessment 3.
+- Software Engineers, System Architects, and Database Administrators tasked with 
+  verifying, testing, deploying, and maintaining the Skillora ecosystem.
+- UI/UX Designers and Quality Assurance (QA) engineers ensuring fidelity to 
+  modern marketplace interactions.
+
+1.2 SCOPE
+Skillora is a specialized, full-stack micro-freelance marketplace designed to 
+connect university and college students possessing technical and creative skills 
+with campus peers, faculty, local businesses, and online clients in need of 
+cost-effective, small-to-medium digital services.
+
+Identified Software Product: Skillora Marketplace System (Version 1.0.0).
+
+What the Software Product WILL DO:
+- Provide unified authentication allowing a single registered user to switch 
+  between "Student (Service Provider)" and "Customer (Service Buyer)" modes 
+  seamlessly without dual accounts.
+- Enable students to publish digital service listings ("Services") across nine 
+  core categories with fixed pricing, delivery timeframes, requirements, tags, 
+  and image galleries.
+- Provide a structured campus verification pipeline wherein students submit 
+  university ID credentials for manual administrator review, unlocking a green 
+  verified campus badge upon approval.
+- Facilitate an end-to-end 7-state order lifecycle: 
+  PENDING -> ACCEPTED / REJECTED -> IN_PROGRESS -> DELIVERED -> COMPLETED 
+  -> CANCELLED.
+- Prevent arbitrary reviews by permitting ratings (1-5 stars) and feedback 
+  strictly after an order has reached verified COMPLETED status.
+- Provide an isolated, role-protected Administrator panel to moderate users, 
+  audit service listings, inspect abuse reports, and approve/reject credentials.
+
+What the Software Product WILL NOT DO (Version 1.0 Scope Exclusions):
+- Skillora V1 does not incorporate third-party online payment gateways (Stripe, 
+  Razorpay, or escrow banking APIs). Financial settlement occurs externally, 
+  avoiding payment-gateway overhead during academic prototype operation.
+- Does not support real-time WebSocket instant messaging or multi-tier (Basic/
+  Standard/Premium) packaging. Fixed pricing per service is adopted for V1.
+- Does not support automated AI-based ID validation; all campus verification 
+  is controlled via human administrative audit.
+
+Application Objectives & Value Proposition:
+- Reduce student unemployment and underemployment by providing a portfolio-
+  backed campus marketplace.
+- Deliver sub-second discovery through multi-parameter faceted filtering (by 
+  category, price range, minimum rating, and text search).
+- Guarantee zero-trust data integrity through strict server-side authorization 
+  and typed database constraints via Prisma ORM.
+
+1.3 DEFINITIONS, ACRONYMS, AND ABBREVIATIONS
+- API: Application Programming Interface
+- CRUD: Create, Read, Update, Delete
+- DFD: Data Flow Diagram
+- DDL: Data Definition Language
+- FIFO: First In, First Out
+- HTTPS: Hypertext Transfer Protocol Secure
+- JWT: JSON Web Token
+- Next.js App Router: React-based server-first application framework utilizing 
+  Server Components and Route Handlers.
+- ORM: Object-Relational Mapping (Prisma)
+- RBAC: Role-Based Access Control
+- RLS: Row-Level Security
+- SDK: Software Development Kit
+- SRS: Software Requirements Specification
+- SSL/TLS: Secure Sockets Layer / Transport Layer Security
+- UI/UX: User Interface / User Experience
+- VUS: Verification Under Supervision
+- Zod: TypeScript-first schema declaration and validation library
+
+1.4 REFERENCES
+1. IEEE Std 830-1998: IEEE Recommended Practice for Software Requirements 
+   Specifications.
+2. Next.js 14 Documentation: https://nextjs.org/docs (App Router paradigm).
+3. Prisma ORM Documentation: https://www.prisma.io/docs.
+4. Auth.js (NextAuth.js v4) Specification: https://next-auth.js.org.
+5. Neon Serverless Postgres Documentation: https://neon.tech/docs.
+6. Tailwind CSS Framework Specification: https://tailwindcss.com/docs.
+7. Fiverr Marketplace UX Architecture (Benchmarked Design Reference).
+
+1.5 OVERVIEW
+The remainder of this SRS is structured as follows:
+- Section 2 (General Description) provides the product perspective, functional 
+  summaries, user characteristics, operational constraints, and assumptions.
+- Section 3 (Specific Requirements) enumerates all external interface requirements, 
+  in-depth functional specifications (Inputs, Processing, Outputs, Error Handling), 
+  and quantifiable non-functional constraints.
+- Section 4 (Analysis Models) presents high-level and detailed Data Flow Diagrams 
+  (Context Level 0, Level 1 Decomposed DFD) and State Transition models.
+- Sections 5 & 6 provide the official GitHub source code and production deployment links.
+
+================================================================================
+2. GENERAL DESCRIPTION
+================================================================================
+
+2.1 PRODUCT PERSPECTIVE
+Skillora is an independent, autonomous web application operating within a modern 
+three-tier client-server architecture:
+
+  +-----------------------------------------------------------------------+
+  |                             CLIENT TIER                               |
+  |  Responsive React 18 / Next.js SPA with Tailwind CSS & Lucide Icons   |
+  +-----------------------------------------------------------------------+
+                                      |
+                           HTTPS / JSON API & Actions
+                                      |
+                                      v
+  +-----------------------------------------------------------------------+
+  |                           APPLICATION TIER                            |
+  |  Next.js 14 App Router, NextAuth JWT Engine, Zod Validation Gateways  |
+  +-----------------------------------------------------------------------+
+                                      |
+                     Prisma ORM over Serverless WebSockets
+                                      |
+                                      v
+  +-----------------------------------------------------------------------+
+  |                             DATA TIER                                 |
+  |   Neon Lakebase PostgreSQL Database (16 Normalized Relational Tables) |
+  |   Cloudinary Distributed CDN (Media Asset & Image Storage)            |
+  +-----------------------------------------------------------------------+
+
+Skillora operates independently without depending on legacy university management 
+systems, yet provides institutional affinity by verifying and highlighting student 
+academic affiliations.
+
+2.2 PRODUCT FUNCTIONS
+The core capabilities of Skillora are divided into five functional clusters:
+
+1. Account & Identity Management:
+   - Registration with email verification and bcrypt salt hashing.
+   - Dual-Mode State Toggle (Student Provider Mode <-> Customer Buyer Mode) 
+     without requiring session re-authentication.
+   - Password recovery and reset mechanisms.
+
+2. Student Portfolio & Verification Management:
+   - Creation of public-facing student resumes detailing degree, graduation year, 
+     college name, skill badges, and GitHub/LinkedIn portfolio URLs.
+   - Campus ID upload pipeline with administrative approval queues.
+
+3. Marketplace Discovery & Catalog Management:
+   - Multi-category gig publishing across 9 categories (Graphic Design, Programming, 
+     Video Editing, Photography, Tutoring, Content Creation, Writing, Events, Marketing).
+   - Real-time faceted search filtering by keyword, price range, and student rating.
+
+4. Order Lifecycle & Collaboration Workflow:
+   - Structured order creation with client requirement inputs and asset links.
+   - Order management transitions (Pending -> In Progress -> Delivered -> Completed).
+   - Delivery submission including download URLs and completion confirmation.
+
+5. Trust, Review & Administrative Control:
+   - Verified post-order review submission with automatic rolling average calculation.
+   - Administrative dashboards for platform analytics, user bans, service takedowns, 
+     and manual credential verification.
+
+2.3 USER CHARACTERISTICS
+The system serves three primary user classes:
+
+1. Student Service Providers:
+   - Demographics: University and polytechnic students seeking freelance income.
+   - Technical Literacy: High familiarity with web browsers and digital uploads.
+   - Domain: Graphic design, programming, translation, multimedia authoring.
+
+2. Customers / Service Seekers:
+   - Demographics: Campus peers, student clubs, local businesses, or external clients.
+   - Technical Literacy: Average. Requires an intuitive, frictionless e-commerce 
+     browse-and-buy interface similar to Fiverr or Amazon.
+
+3. System Administrators:
+   - Demographics: Platform managers, student council moderators, or project evaluators.
+   - Technical Literacy: Advanced. Skilled in content moderation, fraud inspection, 
+     and identity verification audit processes.
+
+2.4 GENERAL CONSTRAINTS
+- Regulatory & Academic Compliance: Must comply with academic integrity standards. 
+  Students may not publish services offering ghost-writing of graded examinations.
+- Network Protocol Constraints: Database communication must traverse port 443 
+  via WebSocket / HTTP adapters (`@neondatabase/serverless`) to guarantee operation 
+  across enterprise and university Wi-Fi firewalls that block raw PostgreSQL port 5432.
+- Device Responsiveness: The user interface must adapt cleanly across viewports 
+  ranging from mobile screens (375px width) to 4K ultra-wide monitors.
+- Browser Compatibility: Must execute without polyfill failure on Google Chrome 
+  v100+, Mozilla Firefox v100+, Apple Safari v15+, and Microsoft Edge v100+.
+
+2.5 ASSUMPTIONS AND DEPENDENCIES
+- Cloud Database Availability: It is assumed that the Neon serverless PostgreSQL 
+  cluster maintains an operational availability >= 99.9%.
+- JavaScript Execution: It is assumed that client web browsers have JavaScript enabled.
+- Stateless Hosting: The Next.js application tier assumes a stateless serverless 
+  runtime (such as Vercel or Render) where state is persisted exclusively in the 
+  relational database and encrypted JWT session cookies.
+
+================================================================================
+3. SPECIFIC REQUIREMENTS
+================================================================================
+
+3.1 EXTERNAL INTERFACE REQUIREMENTS
+
+3.1.1 User Interfaces
+- Layout Paradigm: Clean, modern, accessible design inspired by Fiverr.
+- Navigation Bar: Dynamic navbar displaying platform branding, category dropdowns, 
+  global search bar, mode switch toggle (Buyer <-> Student), notifications bell, 
+  and avatar profile popover.
+- Theme & Accessibility: High-contrast color palette, semantic HTML5 tags, WCAG 2.1 
+  Level AA compliance, ARIA attributes on interactive dropdowns and modals.
+- Component Standards: Input validation error tooltips, visual loading spinners, 
+  skeleton loaders on dynamic catalog views, and confirmation dialogs for destructive 
+  actions (service deletion, order cancellation).
+
+3.1.2 Hardware Interfaces
+- Client-Side: Standard consumer personal computers, laptops, tablets, or smartphones 
+  possessing at least 2 GB of RAM and standard display output (minimum 360 x 640 px).
+- Server-Side: Cloud compute containers with minimum 512 MB memory and 1 shared vCPU 
+  capable of running Node.js 18+ runtimes.
+
+3.1.3 Software Interfaces
+- Operating System: OS-agnostic execution across Linux (Ubuntu/Debian server), 
+  macOS, and Windows 10/11 environments.
+- Relational Database Management System: Neon Serverless PostgreSQL (v16 engine).
+- Database Adapter: Prisma ORM (v5.22.0) interacting with `@prisma/adapter-neon` 
+  and `@neondatabase/serverless` over WSS.
+- Media Storage: Cloudinary REST API (v2.5) for secure image optimization and delivery.
+- Authentication Middleware: NextAuth.js v4 implementing JWT strategy via HMAC-SHA256.
+
+3.1.4 Communications Interfaces
+- Transport Protocol: HTTPS (TLS 1.3 preferred, TLS 1.2 minimum) for all browser-to-server 
+  and server-to-database requests.
+- API Formatting: Uniform JSON payloads (`application/json; charset=utf-8`) with 
+  standardized HTTP status codes (200 OK, 201 Created, 400 Bad Request, 
+  401 Unauthorized, 403 Forbidden, 404 Not Found, 500 Internal Server Error).
+
+--------------------------------------------------------------------------------
+3.2 FUNCTIONAL REQUIREMENTS
+--------------------------------------------------------------------------------
+
+3.2.1 FEATURE 1: USER AUTHENTICATION & DUAL-MODE SWITCHING
+3.2.1.1 Introduction
+Allows users to securely register, authenticate, and toggle dynamically between 
+Customer Mode (purchasing services) and Student Provider Mode (offering gigs) without 
+managing separate credentials.
+
+3.2.1.2 Inputs
+- Registration: Full Name (string, min 2 chars), Email (RFC 5322 format), 
+  Password (string, min 8 chars with uppercase, lowercase, and digit), Role.
+- Login: Email and Plaintext Password.
+- Mode Switch: Target mode ("STUDENT" or "CUSTOMER").
+
+3.2.1.3 Processing
+- Passwords are salted and hashed using `bcryptjs` with a work factor of 10.
+- Login attempts authenticate credentials against the PostgreSQL `User` table.
+- Successful authentication signs an encrypted JWT containing `id`, `email`, 
+  `name`, `role`, and `currentMode`.
+- Mode switching updates the user's active session and database preference via 
+  `PATCH /api/user/mode` and refreshes client context without invalidating credentials.
+
+3.2.1.4 Outputs
+- HTTP 201 Created on successful registration.
+- HTTP 200 OK with secure HTTP-only session cookie on successful login.
+- Dynamic interface transformation adapting dashboard menus to selected mode.
+
+3.2.1.5 Error Handling
+- Duplicate Email: Returns HTTP 409 Conflict with message "Email already registered."
+- Invalid Credentials: Returns HTTP 401 Unauthorized with generic "Invalid email 
+  or password" to thwart user enumeration.
+- Malformed Input: Returns HTTP 422 Unprocessable Entity with detailed Zod schema errors.
+
+--------------------------------------------------------------------------------
+3.2.2 FEATURE 2: STUDENT PROFILE & CAMPUS VERIFICATION
+3.2.2.1 Introduction
+Manages public student portfolios and provides an institutional verification 
+workflow to build marketplace credibility.
+
+3.2.2.2 Inputs
+- Profile Details: Bio, College/University name, Degree/Course, Academic Year, 
+  Skills array, External Portfolio URLs (GitHub, LinkedIn, Website).
+- Verification Submission: Student Identification Card Image URL and Student Roll/ID Number.
+
+3.2.2.3 Processing
+- Profile creation/update writes to the relational `Profile` and `UserSkill` tables.
+- Verification submission creates a record in `StudentVerification` with status `PENDING`.
+- Administrator review action changes status to `APPROVED` or `REJECTED`.
+- When `APPROVED`, the user's profile gains an immutable `isVerified = true` flag, 
+  causing a verified campus checkmark badge to render across all associated gigs.
+
+3.2.2.4 Outputs
+- Publicly accessible student showcase page at `/students/[id]`.
+- Verification audit queue within the Administrator Console at `/admin/verifications`.
+
+3.2.2.5 Error Handling
+- Non-Student Verification Attempt: HTTP 403 Forbidden ("Only student accounts can 
+  apply for campus verification").
+- Duplicate Verification Submission: HTTP 400 Bad Request ("A verification request 
+  is already pending review").
+
+--------------------------------------------------------------------------------
+3.2.3 FEATURE 3: SERVICE CATALOG & GIG MANAGEMENT
+3.2.3.1 Introduction
+Allows verified and registered student providers to author, edit, pause, and delete 
+marketable freelance listings.
+
+3.2.3.2 Inputs
+- Service Title (string, 10-100 characters, e.g., "I will design a modern campus event poster").
+- Category ID (UUID reference).
+- Fixed Price (float, minimum $5.00).
+- Delivery Time (integer, days to complete, 1-30 days).
+- Description (rich markdown text, 50-2000 characters).
+- Cover Image & Gallery URLs (array of strings).
+- Tags (array of lowercase string keywords).
+
+3.2.3.3 Processing
+- Validates payload against `serviceSchema` using Zod.
+- Automatically generates a URL-friendly, unique slug from the service title.
+- Inserts service entity and child `ServiceImage` records into PostgreSQL.
+- Provides provider dashboard overview of active, paused, and draft gigs.
+
+3.2.3.4 Outputs
+- Dedicated public service listing page rendered at `/services/[slug]`.
+- Up-to-date provider listing index at `/dashboard/services`.
+
+3.2.3.5 Error Handling
+- Ownership Violation: An attempt by User A to edit or delete User B's service 
+  returns HTTP 403 Forbidden.
+- Negative or Zero Pricing: Rejected by Zod schema with "Price must be at least $5.00."
+
+--------------------------------------------------------------------------------
+3.2.4 FEATURE 4: SERVICE DISCOVERY, SEARCH, AND FILTERING
+3.2.4.1 Introduction
+Allows prospective clients to rapidly discover services matching project requirements, 
+budget parameters, and quality thresholds.
+
+3.2.4.2 Inputs
+- Keyword query string `?q=...`
+- Category slug `?category=...`
+- Minimum price `?minPrice=...` and Maximum price `?maxPrice=...`
+- Minimum star rating `?minRating=...`
+- Sorting order `?sort=popular|price_asc|price_desc|newest`
+
+3.2.4.3 Processing
+- Constructs dynamic Prisma query clauses combining PostgreSQL `ILIKE` title searches, 
+  relational foreign-key category filters, price range boundaries, and aggregated 
+  average rating conditions.
+- Orders records by view count/orders (popularity), creation timestamp, or price.
+- Returns paginated result sets with total hit counts.
+
+3.2.4.4 Outputs
+- Interactive marketplace grid displaying service thumbnail, title, student provider name, 
+  college affiliation, verified campus badge, starting price, and star rating.
+
+3.2.4.5 Error Handling
+- Out-of-bounds parameters (e.g., negative prices) are sanitized to default valid 
+  ranges without crashing the query handler.
+
+--------------------------------------------------------------------------------
+3.2.5 FEATURE 5: END-TO-END ORDER LIFECYCLE MANAGEMENT
+3.2.5.1 Introduction
+Orchestrates the transactional interaction between customer and student provider 
+through a deterministic 7-state finite state machine.
+
+3.2.5.2 State Machine Transition Rules
+- PENDING: Customer submits project requirements and clicks "Request Service".
+- ACCEPTED: Student provider accepts the terms and commits to fulfillment.
+- REJECTED: Student provider declines the request; order is terminated.
+- IN_PROGRESS: Student provider transitions accepted gig into active development.
+- DELIVERED: Student uploads completed deliverables and completion notes.
+- COMPLETED: Customer reviews deliverables and confirms satisfactory receipt.
+- CANCELLED: Mutual cancellation or customer abort before acceptance.
+
+3.2.5.3 Inputs
+- Order Creation: Service ID, Project Requirements Note, Attachment URLs.
+- Delivery Submission: Deliverable Download Links, Delivery Summary Notes.
+- Order Resolution: Status transition command (ACCEPT, REJECT, DELIVER, COMPLETE, CANCEL).
+
+3.2.5.4 Processing
+- Verifies that a user cannot purchase their own service listing.
+- Enforces strict role authorization per transition:
+  * Only assigned Student can ACCEPT, REJECT, or DELIVER.
+  * Only purchasing Customer can COMPLETE.
+- Automatically generates sequential human-readable tracking codes (e.g., `ORD-202611-0042`).
+- Dispatches transactional in-app notifications on each state change.
+
+3.2.5.5 Outputs
+- Real-time order progress tracking timeline at `/dashboard/orders`.
+- Unlocks the review submission modal upon reaching `COMPLETED` state.
+
+3.2.5.6 Error Handling
+- Invalid State Mutation: Attempting to mark a `PENDING` order directly as `COMPLETED` 
+  returns HTTP 400 Bad Request ("Illegal order state transition").
+- Unauthorized Access: Third-party users querying `/api/orders/[id]` receive HTTP 404 
+  or HTTP 403.
+
+--------------------------------------------------------------------------------
+3.2.6 FEATURE 6: REVIEWS AND REPUTATION ENGINE
+3.2.6.1 Introduction
+Guarantees feedback authenticity by restricting ratings to verified completed orders.
+
+3.2.6.2 Inputs
+- Order ID (UUID).
+- Rating integer (1, 2, 3, 4, or 5 stars).
+- Written review commentary (10-1000 characters).
+
+3.2.6.3 Processing
+- Confirms order status equals `COMPLETED`.
+- Checks for duplicate review entries referencing the same `orderId` (enforced by a 
+  unique database constraint).
+- Inserts review and recalculates the student provider's cumulative rolling average 
+  and total review count in an atomic transaction.
+
+3.2.6.4 Outputs
+- Review card displayed chronologically on the public Service page and Student profile.
+- Updated star metrics across all catalog listings.
+
+3.2.6.5 Error Handling
+- Premature Review: Attempting to review an uncompleted order returns HTTP 400 
+  ("Reviews can only be submitted for completed orders").
+- Duplicate Submission: Returns HTTP 409 Conflict ("You have already reviewed this order").
+
+--------------------------------------------------------------------------------
+3.2.7 FEATURE 7: IN-APP EVENT NOTIFICATIONS
+3.2.7.1 Introduction
+Maintains user engagement by alerting participants to operational events.
+
+3.2.7.2 Inputs
+- Trigger events: New Order Request, Order Accepted, Order Delivered, Order Completed, 
+  New Review Received, Verification Status Updated.
+
+3.2.7.3 Processing
+- Asynchronous database insertion of `Notification` records linked to recipient `userId`.
+- Provides batch read marking (`PATCH /api/notifications`).
+
+3.2.7.4 Outputs
+- Unread badge counter on the navigation bar bell icon.
+- Interactive popover and notifications log displaying event summary and direct link.
+
+3.2.7.5 Error Handling
+- Notification failure does not block primary database transactions.
+
+--------------------------------------------------------------------------------
+3.2.8 FEATURE 8: ADMINISTRATIVE OVERSIGHT & MODERATION
+3.2.8.1 Introduction
+Equips platform administrators with governance tools to maintain community trust.
+
+3.2.8.2 Inputs
+- User moderation actions: Suspend User, Unban User, Delete Account.
+- Content moderation: Pause Service, Remove Inappropriate Service Listing.
+- Verification actions: Approve / Reject Campus ID submission.
+- Category management: Create new category with icon and display order.
+
+3.2.8.3 Processing
+- All routes under `/admin` and `/api/admin/*` validate `session.user.role === 'ADMIN'`.
+- Administrative mutations execute with full relational cascading and audit logging.
+
+3.2.8.4 Outputs
+- Platform analytical summary cards (Total Registered Users, Active Students, 
+  Total Gigs, Total Orders, Completed Projects Volume).
+- Moderation queues at `/admin/users`, `/admin/services`, and `/admin/verifications`.
+
+3.2.8.5 Error Handling
+- Non-admin access attempt returns immediate HTTP 403 Forbidden and client-side 
+  redirect to `/`.
+
+--------------------------------------------------------------------------------
+3.5 NON-FUNCTIONAL REQUIREMENTS
+--------------------------------------------------------------------------------
+
+3.5.1 PERFORMANCE
+- NFR-P1: 95% of static catalog pages (Homepage, Explore, Category Browse) shall achieve 
+  a server response time (Time to First Byte) under 300 milliseconds under normal load.
+- NFR-P2: Search and filtering queries against a database containing 10,000+ service listings 
+  shall execute in under 150 milliseconds through indexed columns (`slug`, `categoryId`, 
+  `studentId`, `status`).
+- NFR-P3: Image assets served through the Cloudinary CDN shall deliver optimized WebP/AVIF 
+  formats achieving a Google Lighthouse Performance Score >= 90.
+
+3.5.2 RELIABILITY
+- NFR-R1: Mean Time Between Failures (MTBF) shall exceed 720 operating hours (30 days).
+- NFR-R2: Database consistency is guaranteed through ACID-compliant PostgreSQL transactions. 
+  No orphaned order requirements or orphaned service images can exist upon transaction failure.
+- NFR-R3: Graceful degradation: In the event of transient database connection loss, the 
+  Next.js client shall display user-friendly toast error alerts rather than unhandled white-screen crashes.
+
+3.5.3 AVAILABILITY
+- NFR-A1: The production platform shall maintain an operational uptime of at least 99.5% 
+  excluding pre-scheduled maintenance intervals.
+- NFR-A2: The database layer utilizes Neon's distributed cloud storage architecture with 
+  automated failover and multi-zone point-in-time recovery capabilities.
+
+3.5.4 SECURITY
+- NFR-S1: All passwords stored in the database must be hashed using `bcrypt` with salt 
+  rounds >= 10. Plaintext passwords shall never appear in logs or network packets.
+- NFR-S2: Sessions must use tamper-proof JSON Web Tokens signed with HMAC-SHA256 and stored 
+  in HTTP-only, SameSite=Lax cookies to prevent Cross-Site Scripting (XSS) extraction.
+- NFR-S3: All API endpoints accepting user input must execute schema validation via Zod 
+  prior to database execution, mitigating SQL Injection and Cross-Site Request Forgery (CSRF).
+- NFR-S4: Role-Based Access Control (RBAC) must be strictly enforced on the server tier. 
+  Client-side route guards alone are considered insufficient.
+
+3.5.5 MAINTAINABILITY
+- NFR-M1: Codebase must maintain 100% TypeScript type safety (`npx tsc --noEmit` exits with 
+  0 errors in strict mode).
+- NFR-M2: Database schema changes must be version-controlled using Prisma declarative 
+  migration scripts (`prisma/schema.prisma`).
+- NFR-M3: Modular UI architecture based on reusable Shadcn/UI and Tailwind CSS design 
+  tokens ensuring component isolation.
+
+3.5.6 PORTABILITY
+- NFR-PO1: The software shall run without code modifications on standard Linux x86_64 serverless 
+  containers (Vercel, Render, AWS Amplify, Docker containers).
+- NFR-PO2: The database layer shall remain fully standard PostgreSQL ANSI SQL compliant, 
+  allowing seamless migration between Neon, Supabase, AWS RDS, or local PostgreSQL instances.
+
+--------------------------------------------------------------------------------
+3.7 DESIGN CONSTRAINTS
+- DC-1 Framework Constraint: Must strictly adhere to Next.js 14 App Router standards 
+  (Server Components for data fetching, Client Components strictly for interactive UI).
+- DC-2 Network Constraint: Database connectivity must utilize WebSocket-compatible connection 
+  pooling (`@prisma/adapter-neon` over port 443) to guarantee reachability from restrictive 
+  firewalled networks.
+- DC-3 Licensing Constraint: All third-party dependencies (Lucide icons, Tailwind CSS, 
+  Bcrypt, Zod) must possess permissive open-source licenses (MIT or Apache 2.0).
+
+--------------------------------------------------------------------------------
+3.9 OTHER REQUIREMENTS
+- Internationalization & Localization: Default currency formatting set to US Dollars ($) 
+  with extensible ISO 4217 helper utilities.
+- Privacy & Data Governance: Users possess full capability to inspect and edit personal 
+  portfolio details, social links, and skills from `/dashboard/settings`.
+
+================================================================================
+4. ANALYSIS MODELS
+================================================================================
+
+4.1 DATA FLOW DIAGRAMS (DFD)
+
+4.1.1 LEVEL 0 DFD (CONTEXT DIAGRAM)
+
+      +-------------------+                  +-------------------+
+      |                   |                  |                   |
+      |  CUSTOMER / BUYER |                  |  STUDENT PROVIDER |
+      |                   |                  |                   |
+      +-------------------+                  +-------------------+
+        |               ^                      |               ^
+        | Requirements, | Order Status,        | Gig Listings, | Order Requests,
+        | Order Request | Delivery Assets      | Work Uploads  | Client Feedback
+        v               |                      v               |
+     ==============================================================
+     |                                                            |
+     |               SKILLORA MARKETPLACE PLATFORM                |
+     |                   (Next.js App Core Engine)                |
+     |                                                            |
+     ==============================================================
+        ^               |                      ^               |
+        | Admin Audit   | Reports,             | Query / DDL   | Records,
+        | Controls      | Moderation Views     | Mutations     | Datasets
+        |               v                      |               v
+      +--------------------+                +---------------------+
+      |   ADMINISTRATOR    |                |   NEON POSTGRESQL   |
+      |     MODERATOR      |                |      DATABASE       |
+      +--------------------+                +---------------------+
+
+--------------------------------------------------------------------------------
+4.1.2 LEVEL 1 DFD (DECOMPOSED SYSTEM PROCESSES)
+
+  [ USER / CLIENT ]
+         |
+         | (1) Credentials / Mode Switch
+         v
+  +------------------+
+  |  1.0 AUTH &      | ---------> [ D1: Users & Profiles Store ]
+  |  SESSION ENGINE  |
+  +------------------+
+         |
+         | (2) Verified Session (JWT)
+         v
+  +------------------+     Search Query      +--------------------+
+  |  2.0 SERVICE     | <------------------- |  3.0 CATALOG       |
+  |  MANAGEMENT      |                      |  DISCOVERY ENGINE  |
+  +------------------+                      +--------------------+
+         |                                             ^
+         | (3) Service Data                            | (4) Faceted Filters
+         v                                             v
+  [ D2: Services & Categories Store ] <---> [ D3: Ratings & Reviews Store ]
+         |
+         | (5) Request Service / Requirements
+         v
+  +------------------+
+  |  4.0 ORDER       | ---------> [ D4: Orders & Deliveries Store ]
+  |  WORKFLOW ENGINE |
+  +------------------+
+         |
+         | (6) State Mutation (DELIVERED -> COMPLETED)
+         v
+  +------------------+
+  |  5.0 REPUTATION  | ---------> Writes Review & Recalculates Student Rating
+  |  & REVIEW ENGINE |
+  +------------------+
+         |
+         | (7) Trigger In-App Notification
+         v
+  [ D5: Notifications Store ] ---------> [ Alert Dispatched to User Bell ]
+
+--------------------------------------------------------------------------------
+4.1.3 STATE TRANSITION MODEL (ORDER LIFECYCLE FINITE STATE MACHINE)
+
+                 [ Customer Submits Requirements ]
+                                |
+                                v
+                         +-------------+
+                         |   PENDING   |
+                         +-------------+
+                           /         \
+        Student Accepts   /           \  Student Declines / Rejects
+                         v             v
+                 +------------+   +------------+
+                 |  ACCEPTED  |   |  REJECTED  | (Terminal State)
+                 +------------+   +------------+
+                        |
+            Student     |
+         Starts Work    v
+               +---------------+
+               |  IN_PROGRESS  |
+               +---------------+
+                        |
+            Student     |
+          Uploads Work  v
+               +---------------+
+               |   DELIVERED   |
+               +---------------+
+                        |
+           Customer     |
+         Confirms Work  v
+               +---------------+
+               |   COMPLETED   |
+               +---------------+
+                        |
+            Customer    |
+          Leaves Rating v
+               +---------------+
+               | REVIEW STORED | (Terminal State)
+               +---------------+
+
+================================================================================
+5. GITHUB LINK
+================================================================================
+[Your GitHub Repository Link will be added here]
+Example: https://github.com/your-username/skillora
+
+================================================================================
+6. DEPLOYED LINK
+================================================================================
+[Your Production Deployed Application Link will be added here]
+Example: https://skillora.vercel.app
+================================================================================
+                              END OF SPECIFICATION
+================================================================================

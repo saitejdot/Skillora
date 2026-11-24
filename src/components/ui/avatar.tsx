@@ -1,0 +1,51 @@
+import * as React from "react";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
+
+interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
+  src?: string | null;
+  alt?: string;
+  fallback?: string;
+  size?: "sm" | "md" | "lg" | "xl";
+}
+
+export function Avatar({
+  src,
+  alt = "User Avatar",
+  fallback = "U",
+  size = "md",
+  className,
+  ...props
+}: AvatarProps) {
+  const sizeClasses = {
+    sm: "h-8 w-8 text-xs",
+    md: "h-10 w-10 text-sm",
+    lg: "h-14 w-14 text-base",
+    xl: "h-20 w-20 text-xl font-bold",
+  };
+
+  const [imageError, setImageError] = React.useState(false);
+
+  return (
+    <div
+      className={cn(
+        "relative flex shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-100 items-center justify-center font-medium text-slate-600",
+        sizeClasses[size],
+        className
+      )}
+      {...props}
+    >
+      {src && !imageError ? (
+        <img
+          src={src}
+          alt={alt}
+          className="aspect-square h-full w-full object-cover"
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <span>{fallback.slice(0, 2).toUpperCase()}</span>
+      )}
+    </div>
+  );
+}
+

@@ -1,0 +1,319 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+enum Role {
+  STUDENT
+  CUSTOMER
+  ADMIN
+}
+
+enum Mode {
+  STUDENT
+  CUSTOMER
+}
+
+enum VerificationStatus {
+  NOT_SUBMITTED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ServiceStatus {
+  ACTIVE
+  PAUSED
+  DRAFT
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  IN_PROGRESS
+  DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationType {
+  ORDER_REQUEST
+  ORDER_ACCEPTED
+  ORDER_REJECTED
+  STATUS_CHANGED
+  WORK_DELIVERED
+  ORDER_COMPLETED
+  NEW_REVIEW
+  SYSTEM
+}
+
+model User {
+  id                 String             @id @default(cuid())
+  name               String
+  email              String             @unique
+  password           String
+  role               Role               @default(CUSTOMER)
+  activeMode         Mode               @default(CUSTOMER)
+  isVerifiedStudent  Boolean            @default(false)
+  verificationStatus VerificationStatus @default(NOT_SUBMITTED)
+  avatar             String?
+  isBlocked          Boolean            @default(false)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  profile              Profile?
+  userSkills           UserSkill[]
+  services             Service[]             @relation("StudentServices")
+  ordersAsBuyer        Order[]               @relation("BuyerOrders")
+  ordersAsStudent      Order[]               @relation("StudentOrders")
+  portfolios           Portfolio[]
+  reviewsGiven         Review[]              @relation("BuyerReviews")
+  reviewsReceived      Review[]              @relation("StudentReviews")
+  favourites           Favourite[]
+  notifications        Notification[]
+  verificationRequests StudentVerification[]
+  reportsMade          Report[]              @relation("Reporter")
+  reportsReceived      Report[]              @relation("ReportedUser")
+
+  @@index([email])
+  @@index([role])
+}
+
+model Profile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  college        String?
+  degree         String?
+  academicYear   String?
+  bio            String?  @db.Text
+  githubUrl      String?
+  linkedinUrl    String?
+  websiteUrl     String?
+  idCardImageUrl String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Category {
+  id           String    @id @default(cuid())
+  name         String    @unique
+  slug         String    @unique
+  description  String?
+  icon         String?
+  displayOrder Int       @default(0)
+  services     Service[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([slug])
+}
+
+model Skill {
+  id         String      @id @default(cuid())
+  name       String      @unique
+  slug       String      @unique
+  userSkills UserSkill[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([slug])
+}
+
+model UserSkill {
+  id      String @id @default(cuid())
+  userId  String
+  skillId String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillId])
+  @@index([userId])
+  @@index([skillId])
+}
+
+model Service {
+  id            String        @id @default(cuid())
+  title         String
+  slug          String        @unique
+  description   String        @db.Text
+  price         Float
+  deliveryDays  Int
+  tags          String[]      @default([])
+  status        ServiceStatus @default(ACTIVE)
+  categoryId    String
+  category      Category      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  studentId     String
+  student       User          @relation("StudentServices", fields: [studentId], references: [id], onDelete: Cascade)
+  images        ServiceImage[]
+  orders        Order[]
+  reviews       Review[]
+  favourites    Favourite[]
+  reports       Report[]
+  averageRating Float         @default(0)
+  totalReviews  Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([studentId])
+  @@index([status])
+}
+
+model ServiceImage {
+  id        String   @id @default(cuid())
+  serviceId String
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  url       String
+  publicId  String?
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([serviceId])
+}
+
+model Portfolio {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  title       String
+  description String?  @db.Text
+  imageUrl    String?
+  projectUrl  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([studentId])
+}
+
+model Order {
+  id                 String       @id @default(cuid())
+  orderNumber        String       @unique
+  serviceId          String
+  service            Service      @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  buyerId            String
+  buyer              User         @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Restrict)
+  studentId          String
+  student            User         @relation("StudentOrders", fields: [studentId], references: [id], onDelete: Restrict)
+  price              Float
+  status             OrderStatus  @default(PENDING)
+  requirements       OrderRequirement?
+  deliveries         Delivery[]
+  review             Review?
+  cancellationReason String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  @@index([orderNumber])
+  @@index([buyerId])
+  @@index([studentId])
+  @@index([status])
+}
+
+model OrderRequirement {
+  id             String    @id @default(cuid())
+  orderId        String    @unique
+  order          Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  description    String    @db.Text
+  attachmentUrls String[]  @default([])
+  deadline       DateTime?
+  createdAt      DateTime  @default(now())
+}
+
+model Delivery {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  message   String   @db.Text
+  fileUrls  String[] @default([])
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  buyerId   String
+  buyer     User     @relation("BuyerReviews", fields: [buyerId], references: [id], onDelete: Restrict)
+  studentId String
+  student   User     @relation("StudentReviews", fields: [studentId], references: [id], onDelete: Restrict)
+  serviceId String
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([buyerId])
+  @@index([studentId])
+  @@index([serviceId])
+}
+
+model Favourite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  serviceId String
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, serviceId])
+  @@index([userId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String           @db.Text
+  type      NotificationType
+  link      String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId, isRead])
+}
+
+model StudentVerification {
+  id              String             @id @default(cuid())
+  userId          String
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  college         String
+  studentIdNumber String
+  idCardUrl       String
+  status          VerificationStatus @default(PENDING)
+  adminNote       String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Report {
+  id                String   @id @default(cuid())
+  reporterId        String
+  reporter          User     @relation("Reporter", fields: [reporterId], references: [id], onDelete: Restrict)
+  reportedUserId    String?
+  reportedUser      User?    @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: SetNull)
+  reportedServiceId String?
+  reportedService   Service? @relation(fields: [reportedServiceId], references: [id], onDelete: SetNull)
+  reason            String   @db.Text
+  status            String   @default("PENDING")
+  createdAt         DateTime @default(now())
+
+  @@index([reporterId])
+  @@index([status])
+}
+
